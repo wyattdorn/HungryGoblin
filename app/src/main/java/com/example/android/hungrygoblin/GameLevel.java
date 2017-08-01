@@ -9,20 +9,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewManager;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
-
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -67,7 +61,7 @@ public class GameLevel extends Activity {
                 LayoutParams.FLAG_FULLSCREEN| LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_level);
-        //create pointer to main screen
+
         mainView = (FrameLayout) findViewById(R.id.main_view);
         //final FrameLayout mainView = (FrameLayout) findViewById(R.id.main_view);
 
@@ -88,16 +82,8 @@ public class GameLevel extends Activity {
         handler = new Handler();
         handler.postDelayed(runnable, 100);
 
-        //obstacleGroup = new ViewGroup(this);
-
-        testObstacle = new Obstacle(this);
-        testObstacle.setX(400);
-        testObstacle.setY(0);
-        testObstacle.setSize(100,100);
-
 
         obstacleList = new ArrayList<Obstacle>();
-        //obstacle = new Obstacle(this);
 
         r = new Random();
         int rand  = r.nextInt(8);
@@ -123,7 +109,7 @@ public class GameLevel extends Activity {
 
         goblin = new GoblinView(this, standardWidth, standardWidth);
         goblin.setX(screenWidth/2);
-        goblin.setY(screenHeight/2);
+        goblin.setY(screenHeight*3/4);
         mGoblinPos.x = goblin.getX();
         mGoblinPos.y = goblin.getY();
 
@@ -136,18 +122,14 @@ public class GameLevel extends Activity {
         for(int x = 0; x < obstacleList.size(); x++){
             mainView.addView(obstacleList.get(x));
         }
-        //mainView.removeView(obstacleList.get(2));
-        //((FrameLayout)obstacleList.get(2).getParent()).removeView(obstacleList.get(2));
 
         //listener for accelerometer, use anonymous class for simplicity
         ((SensorManager)getSystemService(Context.SENSOR_SERVICE)).registerListener(
                 new SensorEventListener() {
                     @Override
                     public void onSensorChanged(SensorEvent event) {
-                        //set ball speed based on phone tilt (ignore Z axis)
+                        //set goblin speed based on phone tilt
                         mGoblinSpd.x = -event.values[0];
-                        //mGoblinSpd.y = event.values[1];
-                        //timer event will redraw ball
                     }
                     @Override
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {} //ignore this event
@@ -189,43 +171,52 @@ public class GameLevel extends Activity {
     public void onResume() //app moved to foreground (also occurs at app startup)
     {
 
-        //create timer to move ball to new position
+        //create timer to move goblin to new position
         mTmr = new Timer();
         mTsk = new TimerTask() {
             public void run() {
-                //if debugging with external device,
-                //  a cat log viewer will be needed on the device
-                //android.util.Log.d(
-                        //"TiltBall","Timer Hit - " + mGoblinPos.x + ":" + mGoblinPos.y);
-                //move ball based on current speed
+                //If goblin hits either side of the screen, it stops
+                if (mGoblinPos.x >= screenWidth - standardWidth && mGoblinSpd.x >= 0){
+                    mGoblinSpd.x = 0;
+                }
+                if (mGoblinPos.x <= 0 && mGoblinSpd.x <= 0){
+                    mGoblinSpd.x = 0;
+                }
+
+                //Update goblin position
                 mGoblinPos.x += mGoblinSpd.x;
-                mGoblinPos.y += mGoblinSpd.y;
-                //if ball goes off screen, reposition to opposite side of screen
-                if (mGoblinPos.x > screenWidth) goblin.setX(0);//
-                if (mGoblinPos.y > screenHeight) goblin.setY(0);//mGoblinPos.y=0;
-                if (mGoblinPos.x < 0) goblin.setY(screenWidth);//mGoblinPos.x=screenWidth;
-                if (mGoblinPos.y < 0) goblin.setY(screenHeight);// mGoblinPos.y=screenHeight;
-                //update ball class instance
                 goblin.setX(mGoblinPos.x);
+
+                //android.util.Log.d("HungryGoblin", "X Position: " + mGoblinPos.x + "X Speed: " + mGoblinSpd.x);
+
+                /******************************************
+                 * To be implemented
+                 * (Allow for the goblin to be pushed down screen upon collision
+                mGoblinPos.y += mGoblinSpd.y;
                 goblin.setY(mGoblinPos.y);
+                ******************************************/
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         for(int x = 0; x < obstacleList.size(); x++){
                             if (obstacleList.get(x) != null) {
-                                obstacleList.get(x).moveDown(5);
                                 if(obstacleList.get(x).getY()>=screenHeight) {
                                     removeView(obstacleList.get(x));
                                     obstacleList.remove(x);
-
+                                    android.util.Log.d("HungryGoblin", "DELETED");
                                 }
+                            }
+                        }
+                        for(int x = 0; x < obstacleList.size(); x++){
+                            if (obstacleList.get(x) != null) {
+                                obstacleList.get(x).moveDown(5);
                             }
                         }
                     }
                 });
 
-                //redraw ball. Must run in background thread to prevent thread lock.
+                //Redraw Goblin, score, and obstacles. Must run in background thread to prevent thread lock.
                 RedrawHandler.post(new Runnable() {
                     public void run() {
                         for(int x = 0; x < obstacleList.size(); x++) {
@@ -244,7 +235,8 @@ public class GameLevel extends Activity {
             @Override
             public void run() {
 
-                //android.util.Log.d("HungryGoblin", "TICK");
+                //Force teh following to run on the UI thread
+                //Creates new rows of obstacles at 1 second intervals
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
