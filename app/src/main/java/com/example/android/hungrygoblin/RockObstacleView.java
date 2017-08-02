@@ -6,9 +6,9 @@ import android.content.Context;
  * Created by Wyatt on 7/26/2017.
  */
 
-public class RockObstacle extends Obstacle {
+public class RockObstacleView extends ObstacleView {
 
-    public RockObstacle(Context context) {
+    public RockObstacleView(Context context) {
         super(context);
     }
 }

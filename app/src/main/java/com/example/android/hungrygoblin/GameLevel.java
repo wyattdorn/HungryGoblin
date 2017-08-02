@@ -27,16 +27,17 @@ public class GameLevel extends Activity {
 
     GoblinView goblin = null;
     ScoreView mScoreView = null;
-    List<Obstacle> obstacleList = null;
+    List<ObstacleView> obstacleViewList = null;
+    List<FoodView> foodViewList = null;
     ViewGroup obstacleGroup = null;
 
     Random r = null;
 
-    Obstacle obstacle = null;
-    Obstacle testObstacle = null;
+    ObstacleView obstacleView = null;
+    FoodView foodView = null;
 
     private int screenWidth, screenHeight;
-    private int score, negativeNumber;
+    private int score;
     private int standardWidth;
     int rand;
 
@@ -83,18 +84,26 @@ public class GameLevel extends Activity {
         handler.postDelayed(runnable, 100);
 
 
-        obstacleList = new ArrayList<Obstacle>();
+        obstacleViewList = new ArrayList<>();
+        foodViewList = new ArrayList<>();
 
         r = new Random();
         int rand  = r.nextInt(8);
 
         for(int x = 0; x < 8; x++){
             if(x != rand){
-                obstacle = new Obstacle(this);
-                obstacle.setX(x*standardWidth);
-                obstacle.setY(standardWidth);
-                obstacle.setSize(standardWidth,standardWidth);
-                obstacleList.add(obstacle);
+                obstacleView = new ObstacleView(this);
+                obstacleView.setX(x*standardWidth);
+                obstacleView.setY(standardWidth);
+                obstacleView.setSize(standardWidth,standardWidth);
+                obstacleViewList.add(obstacleView);
+            }
+            else{
+                foodView = new FoodView(this);
+                foodView.setX(x*standardWidth);
+                foodView.setY(standardWidth);
+                foodView.setSize(standardWidth,standardWidth);
+                foodViewList.add(foodView);
             }
         }
 
@@ -103,7 +112,6 @@ public class GameLevel extends Activity {
 
         score = 0;
 
-        negativeNumber = 1;
         mGoblinSpd.x = 0;
         mGoblinSpd.y = 0;
 
@@ -119,8 +127,11 @@ public class GameLevel extends Activity {
         mainView.addView(mScoreView);
         //mainView.addView(testObstacle);
 
-        for(int x = 0; x < obstacleList.size(); x++){
-            mainView.addView(obstacleList.get(x));
+        for(int x = 0; x < obstacleViewList.size(); x++){
+            mainView.addView(obstacleViewList.get(x));
+        }
+        for(int x = 0; x < foodViewList.size(); x++){
+            mainView.addView(foodViewList.get(x));
         }
 
         //listener for accelerometer, use anonymous class for simplicity
@@ -199,18 +210,33 @@ public class GameLevel extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        for(int x = 0; x < obstacleList.size(); x++){
-                            if (obstacleList.get(x) != null) {
-                                if(obstacleList.get(x).getY()>=screenHeight) {
-                                    removeView(obstacleList.get(x));
-                                    obstacleList.remove(x);
+                        for(int x = 0; x < obstacleViewList.size(); x++){
+                            if (obstacleViewList.get(x) != null) {
+                                if(obstacleViewList.get(x).getY()>=screenHeight) {
+                                    removeView(obstacleViewList.get(x));
+                                    obstacleViewList.remove(x);
                                     android.util.Log.d("HungryGoblin", "DELETED");
                                 }
                             }
                         }
-                        for(int x = 0; x < obstacleList.size(); x++){
-                            if (obstacleList.get(x) != null) {
-                                obstacleList.get(x).moveDown(5);
+                        for(int x = 0; x < obstacleViewList.size(); x++){
+                            if (obstacleViewList.get(x) != null) {
+                                obstacleViewList.get(x).moveDown(5);
+                            }
+                        }
+
+                        for(int x = 0; x < foodViewList.size(); x++){
+                            if (foodViewList.get(x) != null) {
+                                if(foodViewList.get(x).getY()>=screenHeight) {
+                                    removeView(foodViewList.get(x));
+                                    foodViewList.remove(x);
+                                    android.util.Log.d("HungryGoblin", "DELETED");
+                                }
+                            }
+                        }
+                        for(int x = 0; x < foodViewList.size(); x++){
+                            if (foodViewList.get(x) != null) {
+                                foodViewList.get(x).moveDown(5);
                             }
                         }
                     }
@@ -219,8 +245,11 @@ public class GameLevel extends Activity {
                 //Redraw Goblin, score, and obstacles. Must run in background thread to prevent thread lock.
                 RedrawHandler.post(new Runnable() {
                     public void run() {
-                        for(int x = 0; x < obstacleList.size(); x++) {
-                            obstacleList.get(x).invalidate();
+                        for(int x = 0; x < obstacleViewList.size(); x++) {
+                            obstacleViewList.get(x).invalidate();
+                        }
+                        for(int x = 0; x < foodViewList.size(); x++) {
+                            foodViewList.get(x).invalidate();
                         }
                         goblin.invalidate();
                         mScoreView.invalidate();
@@ -245,17 +274,25 @@ public class GameLevel extends Activity {
                         for (int x = 0; x < 8; x++) {
                             if (x != rand) {
 
-                                obstacle = new Obstacle(getApplicationContext());
-                                obstacle.setX(x * standardWidth);
-                                obstacle.setY(standardWidth);
-                                obstacle.setSize(standardWidth, standardWidth);
-                                obstacleList.add(obstacle);
-                                mainView.addView(obstacle);
+                                obstacleView = new ObstacleView(getApplicationContext());
+                                obstacleView.setX(x * standardWidth);
+                                obstacleView.setY(standardWidth);
+                                obstacleView.setSize(standardWidth, standardWidth);
+                                obstacleViewList.add(obstacleView);
+                                mainView.addView(obstacleView);
+                            }
+                            else{
+                                foodView = new FoodView(getApplicationContext());
+                                foodView.setX(x * standardWidth);
+                                foodView.setY(standardWidth);
+                                foodView.setSize(standardWidth, standardWidth);
+                                foodViewList.add(foodView);
+                                mainView.addView(foodView);
                             }
                         }
                     }});
                 android.util.Log.d("HungryGoblin", "MainView size: " + mainView.getChildCount());
-                android.util.Log.d("HungryGoblin", "ObstacleList size: " + obstacleList.size());
+                android.util.Log.d("HungryGoblin", "ObstacleList size: " + obstacleViewList.size());
             }
         };
 

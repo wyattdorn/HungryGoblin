@@ -22,14 +22,27 @@ public class FoodView extends ImageView {
     private LinearLayout.LayoutParams layoutParams = null;
 
     //construct new ball object
-    public FoodView(Context context, float x, float y) {
+    public FoodView(Context context) {
         super(context);
         //color hex is [transparency][red][green][blue]
         mPaint.setColor(0xFFff7777); //not transparent. color is green
-        this.mX = x;
-        this.mY = y;
+        this.mX = 0;
+        this.mY = 0;
         this.setImageResource(R.drawable.apple1);
         layoutParams = new LinearLayout.LayoutParams(100, 100);
+        this.setLayoutParams(layoutParams);
+    }
+
+    public void moveDown(int y){
+        this.mY = this.getY();
+        //this.setY(100);
+        this.setY(this.mY+y);
+    }
+
+    public void setSize(int x, int y){
+        //this.sizeX = x;
+        //this.sizeY = y;
+        layoutParams = new LinearLayout.LayoutParams(x, y);
         this.setLayoutParams(layoutParams);
     }
 

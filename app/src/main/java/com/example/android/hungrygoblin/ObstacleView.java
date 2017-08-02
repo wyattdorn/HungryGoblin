@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
  * Created by Wyatt on 7/26/2017.
  */
 
-public class Obstacle extends ImageView {
+public class ObstacleView extends ImageView {
 
     private String obstacleType = null;
     private float mX, mY;
@@ -18,7 +18,7 @@ public class Obstacle extends ImageView {
     private boolean doesDamage;
     private LinearLayout.LayoutParams layoutParams = null;
 
-    public Obstacle(Context context) {
+    public ObstacleView(Context context) {
         super(context);
         this.mX = 0;
         this.mY = 0;

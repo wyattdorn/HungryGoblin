@@ -74,7 +74,7 @@ public class Level1 extends GameLevel {
         goblin.setY(screenHeight/2);
         mGoblinPos.x = goblin.getX();
         mGoblinPos.y = goblin.getY();
-        mFoodView = new FoodView(this, 400, 900);
+        mFoodView = new FoodView(this);
         mFoodView.setX(screenWidth/2);
         mFoodView.setY(screenHeight/2);
         mScoreView = new ScoreView(this, 8, 8, "Apples ");
