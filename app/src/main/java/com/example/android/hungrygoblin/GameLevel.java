@@ -29,15 +29,18 @@ public class GameLevel extends Activity {
     ScoreView mScoreView = null;
     List<ObstacleView> obstacleViewList = null;
     List<FoodView> foodViewList = null;
-    ViewGroup obstacleGroup = null;
+    List<SpawnableItem> spawnableItemList = null;
 
     Random r = null;
 
     ObstacleView obstacleView = null;
     FoodView foodView = null;
+    SpawnableItem testSpawnableItem = null;
 
     private int screenWidth, screenHeight;
     private int score;
+    private int totalItemsSpawned, spawnDecider, spawnTimeCounter;
+    private int moveSpeed;
     private int standardWidth;
     int rand;
 
@@ -86,26 +89,9 @@ public class GameLevel extends Activity {
 
         obstacleViewList = new ArrayList<>();
         foodViewList = new ArrayList<>();
+        spawnableItemList = new ArrayList<>();
 
         r = new Random();
-        int rand  = r.nextInt(8);
-
-        for(int x = 0; x < 8; x++){
-            if(x != rand){
-                obstacleView = new ObstacleView(this);
-                obstacleView.setX(x*standardWidth);
-                obstacleView.setY(standardWidth);
-                obstacleView.setSize(standardWidth,standardWidth);
-                obstacleViewList.add(obstacleView);
-            }
-            else{
-                foodView = new FoodView(this);
-                foodView.setX(x*standardWidth);
-                foodView.setY(standardWidth);
-                foodView.setSize(standardWidth,standardWidth);
-                foodViewList.add(foodView);
-            }
-        }
 
         mGoblinSpd = new android.graphics.PointF();
         mGoblinPos = new android.graphics.PointF();
@@ -114,6 +100,8 @@ public class GameLevel extends Activity {
 
         mGoblinSpd.x = 0;
         mGoblinSpd.y = 0;
+
+        totalItemsSpawned = 0;
 
         goblin = new GoblinView(this, standardWidth, standardWidth);
         goblin.setX(screenWidth/2);
@@ -127,11 +115,8 @@ public class GameLevel extends Activity {
         mainView.addView(mScoreView);
         //mainView.addView(testObstacle);
 
-        for(int x = 0; x < obstacleViewList.size(); x++){
-            mainView.addView(obstacleViewList.get(x));
-        }
-        for(int x = 0; x < foodViewList.size(); x++){
-            mainView.addView(foodViewList.get(x));
+        for(int x = 0; x < spawnableItemList.size(); x++){
+            mainView.addView(spawnableItemList.get(x));
         }
 
         //listener for accelerometer, use anonymous class for simplicity
@@ -184,6 +169,8 @@ public class GameLevel extends Activity {
 
         //create timer to move goblin to new position
         mTmr = new Timer();
+
+        //Primary game loop
         mTsk = new TimerTask() {
             public void run() {
                 //If goblin hits either side of the screen, it stops
@@ -200,43 +187,58 @@ public class GameLevel extends Activity {
 
                 //android.util.Log.d("HungryGoblin", "X Position: " + mGoblinPos.x + "X Speed: " + mGoblinSpd.x);
 
-                /******************************************
-                 * To be implemented
-                 * (Allow for the goblin to be pushed down screen upon collision
-                mGoblinPos.y += mGoblinSpd.y;
-                goblin.setY(mGoblinPos.y);
-                ******************************************/
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        for(int x = 0; x < obstacleViewList.size(); x++){
-                            if (obstacleViewList.get(x) != null) {
-                                if(obstacleViewList.get(x).getY()>=screenHeight) {
-                                    removeView(obstacleViewList.get(x));
-                                    obstacleViewList.remove(x);
-                                    android.util.Log.d("HungryGoblin", "DELETED");
-                                }
-                            }
-                        }
-                        for(int x = 0; x < obstacleViewList.size(); x++){
-                            if (obstacleViewList.get(x) != null) {
-                                obstacleViewList.get(x).moveDown(5);
-                            }
-                        }
+                        /*
+                        //items move at 5/sec there are 100 ticks/sec
+                        //items move at 500px/sec
 
-                        for(int x = 0; x < foodViewList.size(); x++){
-                            if (foodViewList.get(x) != null) {
-                                if(foodViewList.get(x).getY()>=screenHeight) {
-                                    removeView(foodViewList.get(x));
-                                    foodViewList.remove(x);
-                                    android.util.Log.d("HungryGoblin", "DELETED");
+                        //move speed increases by 1 for every 10 items spawned
+                        moveSpeed = 3 + (int)totalItemsSpawned/10;
+
+                        if(rand==0){
+                            //keep track of total number of items spawned
+                            totalItemsSpawned++;
+
+                            //spawn new item
+                            xPos = r.nextInt(screenWidth-standardWidth);
+                            spawnDecider = r.nextInt(moveSpeed+1);
+                            //at game start, chance of spawning food vs an obstacle is 50/50
+                            //chances of food spawning decreases as time goes on/the items speed up
+                            if(spawnDecider <= 2){
+                                //spawn food
+                            }
+                            else{
+                                //spawn obstacle
+                            }
+
+                            //reset timer
+                            spawnTimeCounter = r.nextInt( (100 - standardWidth/10) );
+
+                            //add the number of ticks required to ensure the next item does not spawn on top of the previous one
+                            spawnTimeCounter += standardWidth/10;
+                        }
+                        else{
+                            //decrement the spawn timer every tick
+                            spawnTimeCounter--;
+                        }
+                        */
+
+
+                        for(int x = 0; x < spawnableItemList.size(); x++){
+                            if (spawnableItemList.get(x) != null) {
+                                if(spawnableItemList.get(x).getY()>=screenHeight) {
+                                    removeView(spawnableItemList.get(x));
+                                    spawnableItemList.remove(x);
+                                    //android.util.Log.d("HungryGoblin", "DELETED");
                                 }
                             }
                         }
-                        for(int x = 0; x < foodViewList.size(); x++){
-                            if (foodViewList.get(x) != null) {
-                                foodViewList.get(x).moveDown(5);
+                        for(int x = 0; x < spawnableItemList.size(); x++){
+                            if (spawnableItemList.get(x) != null) {
+                                spawnableItemList.get(x).moveDown(5);
                             }
                         }
                     }
@@ -245,11 +247,8 @@ public class GameLevel extends Activity {
                 //Redraw Goblin, score, and obstacles. Must run in background thread to prevent thread lock.
                 RedrawHandler.post(new Runnable() {
                     public void run() {
-                        for(int x = 0; x < obstacleViewList.size(); x++) {
-                            obstacleViewList.get(x).invalidate();
-                        }
-                        for(int x = 0; x < foodViewList.size(); x++) {
-                            foodViewList.get(x).invalidate();
+                        for(int x = 0; x < spawnableItemList.size(); x++) {
+                            spawnableItemList.get(x).invalidate();
                         }
                         goblin.invalidate();
                         mScoreView.invalidate();
@@ -264,7 +263,7 @@ public class GameLevel extends Activity {
             @Override
             public void run() {
 
-                //Force teh following to run on the UI thread
+                //Force the following to run on the UI thread
                 //Creates new rows of obstacles at 1 second intervals
                 runOnUiThread(new Runnable() {
                     @Override
@@ -273,26 +272,22 @@ public class GameLevel extends Activity {
 
                         for (int x = 0; x < 8; x++) {
                             if (x != rand) {
-
-                                obstacleView = new ObstacleView(getApplicationContext());
-                                obstacleView.setX(x * standardWidth);
-                                obstacleView.setY(standardWidth);
-                                obstacleView.setSize(standardWidth, standardWidth);
-                                obstacleViewList.add(obstacleView);
-                                mainView.addView(obstacleView);
+                                testSpawnableItem = new ObstacleView(getApplicationContext());
                             }
                             else{
-                                foodView = new FoodView(getApplicationContext());
-                                foodView.setX(x * standardWidth);
-                                foodView.setY(standardWidth);
-                                foodView.setSize(standardWidth, standardWidth);
-                                foodViewList.add(foodView);
-                                mainView.addView(foodView);
+                                testSpawnableItem = new FoodView(getApplicationContext());
                             }
+
+                            testSpawnableItem.setX(x * standardWidth);
+                            testSpawnableItem.setY(standardWidth);
+                            testSpawnableItem.setSize(standardWidth, standardWidth);
+                            spawnableItemList.add(testSpawnableItem);
+                            mainView.addView(testSpawnableItem);
+
                         }
                     }});
                 android.util.Log.d("HungryGoblin", "MainView size: " + mainView.getChildCount());
-                android.util.Log.d("HungryGoblin", "ObstacleList size: " + obstacleViewList.size());
+                android.util.Log.d("HungryGoblin", "ObstacleList size: " + spawnableItemList.size());
             }
         };
 
