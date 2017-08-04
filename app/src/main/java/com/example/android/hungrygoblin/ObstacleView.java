@@ -13,7 +13,7 @@ public class ObstacleView extends SpawnableItem {
         super(context);
         this.mX = 0;
         this.mY = 0;
-        this.setImageResource(R.drawable.fleurdelis64);
+        this.setImageResource(R.drawable.rock1);
         this.layoutParams = new LinearLayout.LayoutParams(100, 100);
         this.setLayoutParams(layoutParams);
     }
