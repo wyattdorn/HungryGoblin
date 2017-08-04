@@ -30,18 +30,21 @@ public class GameLevel extends Activity {
     List<ObstacleView> obstacleViewList = null;
     List<FoodView> foodViewList = null;
     List<SpawnableItem> spawnableItemList = null;
+    List<BackgroundView> backgroundViewList = null;
 
     Random r = null;
 
     ObstacleView obstacleView = null;
     FoodView foodView = null;
     SpawnableItem testSpawnableItem = null;
+    BackgroundView backgroundView = null;
 
     private int screenWidth, screenHeight;
     private int score;
     private int totalItemsSpawned, spawnDecider, spawnTimeCounter;
     private int moveSpeed;
     private int standardWidth;
+    private int horizontalTiles, verticalTiles;
 
     Handler RedrawHandler = new Handler(); //so redraw occurs in main thread
     Timer mTmr = null;
@@ -89,6 +92,9 @@ public class GameLevel extends Activity {
         obstacleViewList = new ArrayList<>();
         foodViewList = new ArrayList<>();
         spawnableItemList = new ArrayList<>();
+        backgroundViewList = new ArrayList<>();
+
+
 
         r = new Random();
 
@@ -104,6 +110,9 @@ public class GameLevel extends Activity {
         spawnTimeCounter = 5;
         moveSpeed = 3;
 
+        horizontalTiles = screenWidth/512 + 1;
+        verticalTiles = screenHeight/1024 + 2;
+
         goblin = new GoblinView(this, standardWidth, standardWidth);
         goblin.setX(screenWidth/2);
         goblin.setY(screenHeight*3/4);
@@ -111,6 +120,8 @@ public class GameLevel extends Activity {
         mGoblinPos.y = goblin.getY();
 
         mScoreView = new ScoreView(this, 8, 8, "Score ");
+
+        generateBackground();
 
         mainView.addView(goblin);
         mainView.addView(mScoreView);
@@ -198,6 +209,8 @@ public class GameLevel extends Activity {
 
                         //move speed increases by 1 for every 10 items spawned
 
+                        tileBackground();
+
                         if(spawnTimeCounter==0){
                             //keep track of total number of items spawned
                             totalItemsSpawned++;
@@ -219,7 +232,7 @@ public class GameLevel extends Activity {
                             }
 
                             testSpawnableItem.setX(r.nextInt(screenWidth-standardWidth));
-                            testSpawnableItem.setY(standardWidth);
+                            testSpawnableItem.setY(0-standardWidth);
                             testSpawnableItem.setSize(standardWidth, standardWidth);
                             spawnableItemList.add(testSpawnableItem);
                             mainView.addView(testSpawnableItem);
@@ -257,6 +270,10 @@ public class GameLevel extends Activity {
                                 spawnableItemList.get(x).moveDown(moveSpeed);
                                 android.util.Log.d("HungryGoblin", "Moving item: " + x);
                             }
+                        }
+                        for(int x = 0; x < backgroundViewList.size(); x++){
+                            backgroundViewList.get(x).moveDown(moveSpeed);
+                            android.util.Log.d("HungryGoblin", "Moving item: " + x);
                         }
                     }
                 });
@@ -322,6 +339,35 @@ public class GameLevel extends Activity {
     public void removeView(View view) {
         ViewGroup vg = (ViewGroup) (view.getParent());
         vg.removeView(view);
+    }
+
+    private void generateBackground(){
+
+        android.util.Log.d("HungryGoblin", "Horizontal: " + horizontalTiles);
+
+        android.util.Log.d("HungryGoblin", "Vertical: " + verticalTiles);
+
+        for(int x = 0; x < horizontalTiles; x++){
+            for(int y = 0; y < verticalTiles; y++){
+                backgroundView = new BackgroundView(this);
+                backgroundView.setX(0 + (512 * x));
+                backgroundView.setY(0 - (1024 * y));
+                backgroundView.setSize(512, 1024);
+                backgroundViewList.add(backgroundView);
+            }
+        }
+
+        for(int x = 0; x < backgroundViewList.size(); x++){
+            mainView.addView(backgroundViewList.get(x));
+        }
+    }
+
+    private void tileBackground(){
+        for(int x = 0; x < backgroundViewList.size(); x++){
+            if(backgroundViewList.get(x).getY()>=screenWidth+750){
+                backgroundViewList.get(x).setY(backgroundViewList.get(x).getY()-(1024*verticalTiles));
+            }
+        }
     }
 
 
