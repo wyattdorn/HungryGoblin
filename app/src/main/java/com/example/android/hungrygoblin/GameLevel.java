@@ -146,39 +146,6 @@ public class GameLevel extends Activity {
                         .getSensorList(Sensor.TYPE_ACCELEROMETER).get(0), SensorManager.SENSOR_DELAY_NORMAL);
 
 
-
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
-    }
-
-    //For state flow see http://developer.android.com/reference/android/app/Activity.html
-    @Override
-    public void onPause() //app moved to background, stop background threads
-    {
-        mTmr.cancel(); //kill\release timer (our only background thread)
-        mTmr = null;
-        mTsk = null;
-        spawnTimer.cancel();
-        spawnTimer = null;
-        super.onPause();
-    }
-
-
-    @Override
-    public void onResume() //app moved to foreground (also occurs at app startup)
-    {
-
         //create timer to move goblin to new position
         mTmr = new Timer();
 
@@ -199,10 +166,11 @@ public class GameLevel extends Activity {
 
                 //android.util.Log.d("HungryGoblin", "X Position: " + mGoblinPos.x + "X Speed: " + mGoblinSpd.x);
 
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
+                        android.util.Log.d("HungryGoblin", "MAIN Loop");
 
                         //items move at 5/sec there are 100 ticks/sec
                         //items move at 500px/sec
@@ -240,7 +208,6 @@ public class GameLevel extends Activity {
 
                             //reset timer
                             spawnTimeCounter = r.nextInt( (500 - standardWidth/10) );
-                            android.util.Log.d("HungryGoblin", "Total items spawned: " + totalItemsSpawned);
 
                             //add the number of ticks required to ensure the next item does not spawn on top of the previous one
                             spawnTimeCounter += standardWidth/10;
@@ -276,7 +243,10 @@ public class GameLevel extends Activity {
                             android.util.Log.d("HungryGoblin", "Moving item: " + x);
                         }
                     }
+
                 });
+
+
 
                 //Redraw Goblin, score, and obstacles. Must run in background thread to prevent thread lock.
                 RedrawHandler.post(new Runnable() {
@@ -290,44 +260,43 @@ public class GameLevel extends Activity {
 
             }}; // TimerTask
 
+
+
         mTmr.schedule(mTsk,10,10); //start timer
 
-        spawnTimer = new Timer();
-        spawnTask = new TimerTask() {
-            @Override
-            public void run() {
 
-                //Force the following to run on the UI thread
-                //Creates new rows of obstacles at 1 second intervals
-                /*
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+    }
 
-                        rand = r.nextInt(8);
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
+    }
 
-                        for (int x = 0; x < 8; x++) {
-                            if (x != rand) {
-                                testSpawnableItem = new ObstacleView(getApplicationContext());
-                            }
-                            else{
-                                testSpawnableItem = new FoodView(getApplicationContext());
-                            }
+    //For state flow see http://developer.android.com/reference/android/app/Activity.html
+    @Override
+    public void onPause() //app moved to background, stop background threads
+    {
+        mTmr.cancel(); //kill\release timer (our only background thread)
+        mTmr = null;
+        mTsk = null;
+        spawnTimer.cancel();
+        spawnTimer = null;
+        super.onPause();
+    }
 
-                            testSpawnableItem.setX(x * standardWidth);
-                            testSpawnableItem.setY(standardWidth);
-                            testSpawnableItem.setSize(standardWidth, standardWidth);
-                            spawnableItemList.add(testSpawnableItem);
-                            mainView.addView(testSpawnableItem);
 
-                        }
-                    }});*/
-                android.util.Log.d("HungryGoblin", "MainView size: " + mainView.getChildCount());
-                android.util.Log.d("HungryGoblin", "ObstacleList size: " + spawnableItemList.size());
-            }
-        };
+    @Override
+    public void onResume() //app moved to foreground (also occurs at app startup)
+    {
 
-        spawnTimer.schedule(spawnTask, 10, 1000);
 
 
         super.onResume();
@@ -364,7 +333,7 @@ public class GameLevel extends Activity {
 
     private void tileBackground(){
         for(int x = 0; x < backgroundViewList.size(); x++){
-            if(backgroundViewList.get(x).getY()>=screenWidth+750){
+            if(backgroundViewList.get(x).getY()>=screenWidth+1024){
                 backgroundViewList.get(x).setY(backgroundViewList.get(x).getY()-(1024*verticalTiles));
             }
         }

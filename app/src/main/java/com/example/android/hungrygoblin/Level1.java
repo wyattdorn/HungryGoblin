@@ -129,6 +129,44 @@ public class Level1 extends GameLevel {
     public void onResume() //app moved to foreground (also occurs at app startup)
     {
 
+        spawnTimer = new Timer();
+        spawnTask = new TimerTask() {
+            @Override
+            public void run() {
+
+                //Force the following to run on the UI thread
+                //Creates new rows of obstacles at 1 second intervals
+                /*
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        rand = r.nextInt(8);
+
+                        for (int x = 0; x < 8; x++) {
+                            if (x != rand) {
+                                testSpawnableItem = new ObstacleView(getApplicationContext());
+                            }
+                            else{
+                                testSpawnableItem = new FoodView(getApplicationContext());
+                            }
+
+                            testSpawnableItem.setX(x * standardWidth);
+                            testSpawnableItem.setY(standardWidth);
+                            testSpawnableItem.setSize(standardWidth, standardWidth);
+                            spawnableItemList.add(testSpawnableItem);
+                            mainView.addView(testSpawnableItem);
+
+                        }
+                    }});*/
+                //android.util.Log.d("HungryGoblin", "MainView size: " + mainView.getChildCount());
+                //android.util.Log.d("HungryGoblin", "ObstacleList size: " + spawnableItemList.size());
+            }
+        };
+
+        spawnTimer.schedule(spawnTask, 10, 1000);
+
+
         //create timer to move ball to new position
         mTmr = new Timer();
         mTsk = new TimerTask() {
