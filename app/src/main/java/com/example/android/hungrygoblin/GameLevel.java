@@ -164,8 +164,6 @@ public class GameLevel extends Activity {
                 mGoblinPos.x += mGoblinSpd.x;
                 goblin.setX(mGoblinPos.x);
 
-                //android.util.Log.d("HungryGoblin", "X Position: " + mGoblinPos.x + "X Speed: " + mGoblinSpd.x);
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -185,9 +183,7 @@ public class GameLevel extends Activity {
 
                             //spawn new item
                             spawnDecider = r.nextInt(moveSpeed+1);
-
-
-
+                            
                             //at game start, chance of spawning food vs an obstacle is 50/50
                             //chances of food spawning decreases as time goes on/the items speed up
                             if(spawnDecider <= 2){
