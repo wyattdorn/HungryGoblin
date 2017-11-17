@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 
 public class FoodView extends SpawnableItem {
 
-    //construct new ball object
+    //construct new food object
     public FoodView(Context context) {
         super(context);
         this.mX = 0;

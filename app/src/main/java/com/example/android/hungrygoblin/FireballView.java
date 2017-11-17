@@ -9,18 +9,18 @@ import android.graphics.Canvas;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-public class GoblinView extends ImageView {
+public class FireballView extends SpawnableItem {
 
     public float mX;
     public float mY;
     private LinearLayout.LayoutParams layoutParams = null;
 
-    //construct new goblin object
-    public GoblinView(Context context, int width, int height) {
+    //construct new fireball object
+    public FireballView(Context context, int width, int height) {
         super(context);
         //this.mX = x;
         //this.mY = y;
-        this.setImageResource(R.drawable.gobbo1);
+        this.setImageResource(R.drawable.fireball1);
         layoutParams = new LinearLayout.LayoutParams(width, height);
         this.setLayoutParams(layoutParams);
     }

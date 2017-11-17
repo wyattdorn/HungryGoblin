@@ -27,6 +27,7 @@ public class GameLevel extends Activity {
 
     GoblinView goblin = null;
     ScoreView mScoreView = null;
+    FireballView mFireballView = null;
     List<ObstacleView> obstacleViewList = null;
     List<FoodView> foodViewList = null;
     List<SpawnableItem> spawnableItemList = null;
@@ -45,6 +46,7 @@ public class GameLevel extends Activity {
     private int moveSpeed;
     private int standardWidth;
     private int horizontalTiles, verticalTiles;
+    private float touchLocationX, touchLocationY;
 
     Handler RedrawHandler = new Handler(); //so redraw occurs in main thread
     Timer mTmr = null;
@@ -145,6 +147,17 @@ public class GameLevel extends Activity {
                 ((SensorManager)getSystemService(Context.SENSOR_SERVICE))
                         .getSensorList(Sensor.TYPE_ACCELEROMETER).get(0), SensorManager.SENSOR_DELAY_NORMAL);
 
+        //listen for a touch event on the screen
+        mainView.setOnTouchListener(new android.view.View.OnTouchListener() {
+            public boolean onTouch(android.view.View v, android.view.MotionEvent e) {
+                touchLocationX = e.getX();
+                touchLocationY = e.getY();
+                if(mFireballView == null) {
+                    generateFireball();
+                }
+                return true;
+            }});
+
 
         //create timer to move goblin to new position
         mTmr = new Timer();
@@ -163,6 +176,11 @@ public class GameLevel extends Activity {
                 //Update goblin position
                 mGoblinPos.x += mGoblinSpd.x;
                 goblin.setX(mGoblinPos.x);
+
+                //the fireball moves up at twice the rate the other items move down
+                if(mFireballView != null) {
+                    mFireballView.moveDown(-2 * moveSpeed);
+                }
 
                 tileBackground();
 
@@ -220,7 +238,7 @@ public class GameLevel extends Activity {
                         }
 
 
-
+                        //If any spawnableItem moves off the screen, remove it form the list
                         for(int x = 0; x < spawnableItemList.size(); x++){
                             if (spawnableItemList.get(x) != null) {
                                 if(spawnableItemList.get(x).getY()>=screenHeight) {
@@ -230,16 +248,27 @@ public class GameLevel extends Activity {
                                 }
                             }
                         }
+
+                        if(mFireballView != null && mFireballView.getY()<=0){
+                            mainView.removeView(mFireballView);
+                            mFireballView = null;
+                        }
+
+                        //move all spawnableItems down at moveSpeed
                         for(int x = 0; x < spawnableItemList.size(); x++){
                             if (spawnableItemList.get(x) != null) {
                                 spawnableItemList.get(x).moveDown(moveSpeed);
                                 android.util.Log.d("HungryGoblin", "Moving item: " + x);
                             }
                         }
+
+                        //move all background tiles down at moveSPeed
                         for(int x = 0; x < backgroundViewList.size(); x++){
                             backgroundViewList.get(x).moveDown(moveSpeed);
                             android.util.Log.d("HungryGoblin", "Moving item: " + x);
                         }
+
+
                     }
 
                 });
@@ -263,7 +292,7 @@ public class GameLevel extends Activity {
         mTmr.schedule(mTsk,10,10); //start timer
 
 
-    }
+    } //onCreate()
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -276,7 +305,7 @@ public class GameLevel extends Activity {
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
-    }
+    } //onWindowFocusChanged()
 
     //For state flow see http://developer.android.com/reference/android/app/Activity.html
     @Override
@@ -288,25 +317,27 @@ public class GameLevel extends Activity {
         spawnTimer.cancel();
         spawnTimer = null;
         super.onPause();
-    }
+    } //onPause
 
 
     @Override
     public void onResume() //app moved to foreground (also occurs at app startup)
     {
-
-
-
         super.onResume();
-
     } // onResume
 
 
+    public void generateFireball(){
+        mFireballView = new FireballView(this, 50, 100);
+        mFireballView.setX(goblin.getX());
+        mFireballView.setY(goblin.getY());
+        mainView.addView(mFireballView);
+    }
 
     public void removeView(View view) {
         ViewGroup vg = (ViewGroup) (view.getParent());
         vg.removeView(view);
-    }
+    } //removeView()
 
     private void generateBackground(){
 
@@ -327,7 +358,7 @@ public class GameLevel extends Activity {
         for(int x = 0; x < backgroundViewList.size(); x++){
             mainView.addView(backgroundViewList.get(x));
         }
-    }
+    } //generateBackground()
 
     private void tileBackground(){
         for(int x = 0; x < backgroundViewList.size(); x++){
@@ -335,7 +366,7 @@ public class GameLevel extends Activity {
                 backgroundViewList.get(x).setY(backgroundViewList.get(x).getY()-(1024*verticalTiles));
             }
         }
-    }
+    } //tileBackground
 
 
     @Override
@@ -344,7 +375,7 @@ public class GameLevel extends Activity {
         super.onDestroy();
         System.runFinalizersOnExit(true); //wait for threads to exit before clearing app
         android.os.Process.killProcess(android.os.Process.myPid());  //remove app from memory
-    }
+    } //onDestroy()
 
     //listener for config change.
     //This is called when user tilts phone enough to trigger landscape view
@@ -353,6 +384,6 @@ public class GameLevel extends Activity {
     public void onConfigurationChanged(Configuration newConfig)
     {
         //super.onConfigurationChanged(newConfig);
-    }
+    } //onConfigurationChange()
 
 }

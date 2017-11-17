@@ -16,7 +16,7 @@ public class SpawnableItem extends ImageView {
 
     protected LinearLayout.LayoutParams layoutParams = null;
 
-    //construct new ball object
+    //construct new spawnable object
     public SpawnableItem(Context context) {
         super(context);
     }
