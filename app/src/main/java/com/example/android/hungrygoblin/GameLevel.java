@@ -164,6 +164,8 @@ public class GameLevel extends Activity {
                 mGoblinPos.x += mGoblinSpd.x;
                 goblin.setX(mGoblinPos.x);
 
+                tileBackground();
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -175,7 +177,7 @@ public class GameLevel extends Activity {
 
                         //move speed increases by 1 for every 10 items spawned
 
-                        tileBackground();
+                        //tileBackground();
 
                         if(spawnTimeCounter==0){
                             //keep track of total number of items spawned
