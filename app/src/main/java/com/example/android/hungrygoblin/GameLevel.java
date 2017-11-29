@@ -46,6 +46,7 @@ public class GameLevel extends Activity {
     private int moveSpeed;
     private int standardWidth;
     private int horizontalTiles, verticalTiles;
+    private int numFireballs;
     private float touchLocationX, touchLocationY;
 
     Handler RedrawHandler = new Handler(); //so redraw occurs in main thread
@@ -341,9 +342,11 @@ public class GameLevel extends Activity {
 
     private void generateBackground(){
 
-        android.util.Log.d("HungryGoblin", "Horizontal: " + horizontalTiles);
+        android.util.Log.d("HungryGoblin", "Spawnable Items: " + spawnableItemList.size());
 
-        android.util.Log.d("HungryGoblin", "Vertical: " + verticalTiles);
+        //android.util.Log.d("HungryGoblin", "Horizontal: " + horizontalTiles);
+
+        //android.util.Log.d("HungryGoblin", "Vertical: " + verticalTiles);
 
         for(int x = 0; x < horizontalTiles; x++){
             for(int y = 0; y < verticalTiles; y++){
